@@ -1,15 +1,22 @@
 repos:
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v1.49.0
+    hooks:
+      - id: golangci-lint
   - repo: https://github.com/lietu/go-pre-commit
     rev: v0.0.1
     hooks:
-      - id: go-fmt-goimports
       - id: go-test
       - id: go-vet
-      - id: golangci-lint
   - repo: local
     hooks:
       - id: go-mod-tidy
         name: go-mod-tidy
         entry: go mod tidy
-        language: script
-        files: '.*\.go'
+        language: system
+        pass_filenames: false
+      - id: go-fmt
+        name: go-fmt
+        entry: go fmt
+        language: system
+        pass_filenames: false
