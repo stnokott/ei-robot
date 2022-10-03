@@ -1,4 +1,4 @@
-module stnokott/eierschaukel
+module stnokott/eirobot
 
 go 1.18
 

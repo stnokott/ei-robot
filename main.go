@@ -4,8 +4,8 @@ import (
 	"log"
 	"strings"
 
-	"stnokott/eierschaukel/internal/constants"
-	"stnokott/eierschaukel/internal/logic"
+	"stnokott/eirobot/internal/constants"
+	"stnokott/eirobot/internal/logic"
 
 	"github.com/NicoNex/echotron/v3"
 	"github.com/looplab/fsm"
