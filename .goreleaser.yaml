@@ -29,7 +29,7 @@ changelog:
 release:
   github:
     owner: stnokott
-    name: firefly-import-helper
+    name: eirobot
   name_template: "{{ .ProjectName }}-v{{ .Version }}"
   mode: append
   header: |
