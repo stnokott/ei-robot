@@ -44,7 +44,7 @@ dockers:
       - "ghcr.io/stnokott/ei-robot:{{ .Tag }}"
     goos: linux
     goarch: arm64
-    dockerfile: "{{ .Env.DOCKERFILE }}"
+    dockerfile: "Dockerfile"
     build_flag_templates:
       - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
