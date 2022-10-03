@@ -31,9 +31,11 @@ func (f *FSM) Current() string {
 	return f.fsm.Current()
 }
 
+type TelegramCb func()
+
 type TelegramCbs struct {
-	OnStartCmd   func()
-	OnUnknownCmd func()
+	OnStartCmd   TelegramCb
+	OnUnknownCmd TelegramCb
 }
 
 func NewFSM(cbs TelegramCbs) *FSM {
