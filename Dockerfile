@@ -1,3 +1,3 @@
 FROM alpine:latest
-ENTRYPOINT ["/app"]
 COPY app /
+ENTRYPOINT ["/app"]
