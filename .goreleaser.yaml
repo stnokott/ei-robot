@@ -19,10 +19,22 @@ builds:
     binary: app
 changelog:
   sort: asc
+  abbrev: -1
+  use: github-native
   filters:
     exclude:
       - "^docs:"
+      - typo
       - "^test:"
+  groups:
+    - title: Features
+      regexp: "^.*feat[(\\w)]*:+.*$"
+      order: 0
+    - title: "Bug fixes"
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 1
+    - title: Others
+      order: 999
 release:
   github:
     owner: stnokott
