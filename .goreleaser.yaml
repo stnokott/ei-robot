@@ -74,7 +74,7 @@ announce:
     enabled: true
     chat_id: 725149271
     message_template: |
-      *GoReleaser-Benachrichtigung:*
+      <b>GoReleaser-Benachrichtigung:</b>
 
       Neue Version `{{ .Version }}` für [{{ .ProjectName }}]({{ .GitURL }}) veröffentlicht!
       Release Notes:
