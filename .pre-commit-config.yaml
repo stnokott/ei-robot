@@ -1,10 +1,22 @@
 repos:
-  - repo: https://github.com/Bahjat/pre-commit-golang
-    rev: v1.0.3
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v1.49.0
     hooks:
-      - id: go-fmt-import
-      - id: go-vet
-      - id: go-unit-tests
-      - id: go-err-check
-      - id: go-static-check
       - id: golangci-lint
+  - repo: https://github.com/lietu/go-pre-commit
+    rev: v0.0.1
+    hooks:
+      - id: go-test
+      - id: go-vet
+  - repo: local
+    hooks:
+      - id: go-mod-tidy
+        name: go-mod-tidy
+        entry: go mod tidy
+        language: system
+        pass_filenames: false
+      - id: go-fmt
+        name: go-fmt
+        entry: go fmt
+        language: system
+        pass_filenames: false
