@@ -14,7 +14,7 @@ permissions:
   packages: write
 
 env:
-  TELEGRAM_TOKEN: ${{env.TELEGRAM_TOKEN}}
+  TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
 
 jobs:
   goreleaser:
