@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+
+before:
+  hooks:
+    - go mod tidy
+    - go mod verify
+    - go generate ./...
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+    binary: app
+archives:
+  - replacements:
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+checksum:
+  name_template: "checksums.txt"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+release:
+  github:
+    owner: stnokott
+    name: firefly-import-helper
+  name_template: "{{ .ProjectName }}-v{{ .Version }}"
+  mode: append
+  header: |
+    ## New release v{{ .Version }}!
