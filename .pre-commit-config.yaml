@@ -1,0 +1,10 @@
+repos:
+  - repo: https://github.com/Bahjat/pre-commit-golang
+    rev: v1.0.3
+    hooks:
+      - id: go-fmt-import
+      - id: go-vet
+      - id: go-unit-tests
+      - id: go-err-check
+      - id: go-static-check
+      - id: golangci-lint
