@@ -74,6 +74,7 @@ func main() {
 		log.Panicf("Error getting configuration: %s", err)
 	}
 	api := echotron.NewAPI(config.TelegramToken)
+	log.Printf("Running with Telegram token '%sXXXXXX:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX%s'", config.TelegramToken[:4], config.TelegramToken[len(config.TelegramToken)-4:])
 
 	dsp := echotron.NewDispatcher(config.TelegramToken, func(chatId int64) echotron.Bot { return newBot(chatId, api) })
 	log.Println("Polling...")
