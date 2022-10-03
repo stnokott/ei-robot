@@ -74,10 +74,12 @@ announce:
     enabled: true
     chat_id: 725149271
     message_template: |
-      <b>GoReleaser-Benachrichtigung:</b>
+      GoReleaser-Benachrichtigung:
 
-      Neue Version `{{ .Version }}` für [{{ .ProjectName }}]({{ .GitURL }}) veröffentlicht!
+      Neue Version {{ .Version }} für {{ .ProjectName }} veröffentlicht!
       Release Notes:
       {{ .ReleaseNotes }}
 
-      `docker pull ghcr.io/stnokott/{{ .ProjectName }}:{{ .Version }}`
+      docker pull ghcr.io/stnokott/{{ .ProjectName }}:{{ .Version }}
+
+      {{ .GitURL }}
