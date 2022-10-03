@@ -12,14 +12,46 @@ builds:
       - linux
       - windows
     binary: app
-archives:
-  - replacements:
-      linux: Linux
-      windows: Windows
-      386: i386
-      amd64: x86_64
-checksum:
-  name_template: "checksums.txt"
+dockers:
+  - image_templates:
+      - "ghcr.io/stnokott/ei-robot:latest"
+      - "ghcr.io/stnokott/ei-robot:{{ .Tag }}"
+    goos: linux
+    goarch: amd64
+    dockerfile: "{{ .Env.DOCKERFILE }}"
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--platform=linux/amd64"
+  - image_templates:
+      - "ghcr.io/stnokott/ei-robot:latest"
+      - "ghcr.io/stnokott/ei-robot:{{ .Tag }}"
+    goos: linux
+    goarch: arm
+    dockerfile: "{{ .Env.DOCKERFILE }}"
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--platform=linux/arm"
+  - image_templates:
+      - "ghcr.io/stnokott/ei-robot:latest"
+      - "ghcr.io/stnokott/ei-robot:{{ .Tag }}"
+    goos: linux
+    goarch: arm64
+    dockerfile: "{{ .Env.DOCKERFILE }}"
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--platform=linux/arm64"
 changelog:
   sort: asc
   filters:
@@ -31,6 +63,8 @@ release:
     owner: stnokott
     name: ei-robot
   name_template: "{{ .ProjectName }}-v{{ .Version }}"
-  mode: append
-  header: |
-    ## New release v{{ .Version }}!
+announce:
+  telegram:
+    enabled: true
+    chat_id: 725149271
+    message_template: "{{ .ProjectName }} Version {{ .Tag }} ist veröffentlicht!"
