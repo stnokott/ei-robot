@@ -42,10 +42,14 @@ func newBot(chatID int64) echotron.Bot {
 
 // This method is needed to implement the echotron.Bot interface.
 func (b *bot) Update(update *echotron.Update) {
+	var err error
 	if strings.HasPrefix(update.Message.Text, "/start") {
-		b.fsm.Event(logic.TRANS_START)
+		err = b.fsm.Event(logic.TRANS_START)
 	} else {
-		b.fsm.Event(logic.TRANS_UNKNOWN)
+		err = b.fsm.Event(logic.TRANS_UNKNOWN)
+	}
+	if err != nil {
+		log.Panicf("Could not pass command to FSM: %s", err)
 	}
 }
 
