@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"stnokott/eirobot/internal/config"
 	"stnokott/eirobot/internal/constants"
@@ -31,11 +33,36 @@ func newBot(chatID int64, api echotron.API) echotron.Bot {
 		api,
 	}
 	cbs := logic.TelegramCbs{
-		OnStartCmd:   b.sendHelpMsg,
 		OnUnknownCmd: b.sendUnknownCommandMsg,
+		OnStartCmd:   b.sendHelpMsg,
+		OnNewEggCmd:  b.sendNewEggInitMsg,
 	}
 	b.fsm = logic.NewFSM(cbs)
 	return b
+}
+
+const (
+	CMD_START  string = "/start"
+	CMD_NEWEGG string = "/new_egg"
+)
+
+func botSetup(api *echotron.API) {
+	// Chat Menu => commands
+	mbOpts := echotron.SetChatMenuButtonOptions{
+		MenuButton: echotron.MenuButton{
+			Type: "commands",
+		},
+	}
+	if _, err := api.SetChatMenuButton(mbOpts); err != nil {
+		log.Panicf("Error setting menu button: %s", err)
+	}
+
+	// Chat menu commands
+	cmdStart := echotron.BotCommand{Command: CMD_START, Description: "Hilfetext anzeigen"}
+	cmdNewEgg := echotron.BotCommand{Command: CMD_NEWEGG, Description: "Neues Ei registrieren"}
+	if _, err := api.SetMyCommands(nil, cmdStart, cmdNewEgg); err != nil {
+		log.Panicf("Error setting command list: %s", err)
+	}
 }
 
 // This method is needed to implement the echotron.Bot interface.
@@ -51,21 +78,41 @@ func (b *bot) Update(update *echotron.Update) {
 	}
 }
 
-var msgOptions = &echotron.MessageOptions{ParseMode: "MarkdownV2"}
+var defaultMsgOptions = &echotron.MessageOptions{ParseMode: "MarkdownV2"}
 
-func (b *bot) trySendMsg(s string) {
-	_, err := b.SendMessage(s, b.chatID, msgOptions)
+func (b *bot) trySendMsg(s string, opts *echotron.MessageOptions) {
+	var o *echotron.MessageOptions
+	if opts == nil {
+		o = defaultMsgOptions
+	} else {
+		o := opts
+		o.ParseMode = defaultMsgOptions.ParseMode
+	}
+	_, err := b.SendMessage(s, b.chatID, o)
 	if err != nil {
 		log.Printf("ERROR trying to send message to chatId %d:\nMessage:\n%s\n%s", b.chatID, s, err)
 	}
 }
 
 func (b *bot) sendHelpMsg() {
-	b.trySendMsg(constants.MSG_HELP)
+	b.trySendMsg(constants.MSG_HELP, nil)
 }
 
 func (b *bot) sendUnknownCommandMsg() {
-	b.trySendMsg(constants.MSG_UNKNOWN_COMMAND)
+	b.trySendMsg(constants.MSG_UNKNOWN_COMMAND, nil)
+}
+
+func (b *bot) sendNewEggInitMsg() {
+	// TODO: check no existing eggs
+	buttonRow := []echotron.KeyboardButton{
+		{Text: "Relativ (z.B. in 14 Tagen)"},
+		{Text: fmt.Sprintf("Absolut (z.B. %s)", time.Now().Add(14*24*time.Hour).Format("02.01.2006"))},
+	}
+	replyMarkup := echotron.ReplyKeyboardMarkup{
+		InputFieldPlaceholder: "Bitte Datum auswählen",
+		Keyboard:              [][]echotron.KeyboardButton{buttonRow},
+	}
+	b.trySendMsg(constants.MSG_NEWEGG_INIT, &echotron.MessageOptions{ReplyMarkup: replyMarkup})
 }
 
 func main() {
@@ -75,6 +122,7 @@ func main() {
 	}
 	log.Printf("Running with Telegram token '%sXXXXXX:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX%s'", config.TelegramToken[:4], config.TelegramToken[len(config.TelegramToken)-4:])
 	api := echotron.NewAPI(config.TelegramToken)
+	botSetup(&api)
 
 	dsp := echotron.NewDispatcher(config.TelegramToken, func(chatId int64) echotron.Bot { return newBot(chatId, api) })
 	log.Println("Polling...")
