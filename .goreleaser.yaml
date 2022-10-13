@@ -20,7 +20,7 @@ builds:
 changelog:
   sort: asc
   abbrev: -1
-  use: github-native
+  use: github
   filters:
     exclude:
       - "^docs:"
@@ -33,6 +33,9 @@ changelog:
     - title: "Bug fixes"
       regexp: "^.*fix[(\\w)]*:+.*$"
       order: 1
+    - title: "Dependencies"
+      regexp: "^.*deps[(\\w)]*:+.*$"
+      order: 2
     - title: Others
       order: 999
 release:
