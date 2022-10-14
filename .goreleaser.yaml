@@ -26,6 +26,7 @@ changelog:
       - "^docs:"
       - typo
       - "^test:"
+      - "^internal:"
   groups:
     - title: Features
       regexp: "^.*feat[(\\w)]*:+.*$"
