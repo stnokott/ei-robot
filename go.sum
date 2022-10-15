@@ -1,4 +1,6 @@
 github.com/NicoNex/echotron/v3 v3.20.0 h1:8veDxukcx4Ohl+rhOwkBm8E7IMV9Bg+1lsG85ZkUEcQ=
 github.com/NicoNex/echotron/v3 v3.20.0/go.mod h1:0PcVrCCcHZx/4XfwbGSkUYgfMkXuehw4xiZpxp1EkDU=
+github.com/goodsign/monday v1.0.0 h1:Yyk/s/WgudMbAJN6UWSU5xAs8jtNewfqtVblAlw0yoc=
+github.com/goodsign/monday v1.0.0/go.mod h1:r4T4breXpoFwspQNM+u2sLxJb2zyTaxVGqUfTBjWOu8=
 github.com/looplab/fsm v0.3.0 h1:kIgNS3Yyud1tyxhG8kDqh853B7QqwnlWdgL3TD2s3Sw=
 github.com/looplab/fsm v0.3.0/go.mod h1:PmD3fFvQEIsjMEfvZdrCDZ6y8VwKTwWNjlpEr6IKPO4=

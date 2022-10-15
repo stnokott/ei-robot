@@ -5,17 +5,21 @@ import (
 )
 
 const (
-	STATE_IDLE             string = "STATE_IDLE"
-	STATE_CHOOSE_DATE_TYPE string = "STATE_CHOOSE_DATE_TYPE"
-	TRANS_UNKNOWN          string = "TRANS_UNKNOWN"
-	TRANS_START            string = "TRANS_START"
-	TRANS_NEW_EGG          string = "TRANS_NEW_EGG"
+	STATE_IDLE            string = "STATE_IDLE"
+	STATE_WAIT_DATE       string = "STATE_WAIT_DATE"
+	TRANS_UNKNOWN         string = "TRANS_UNKNOWN"
+	TRANS_START           string = "TRANS_START"
+	TRANS_NEW_EGG         string = "TRANS_NEW_EGG"
+	TRANS_SET_DAY_VALID   string = "TRANS_SET_DAY"
+	TRANS_SET_DAY_INVALID string = "TRANS_SET_DAY_INVALID"
 )
 
 var events = fsm.Events{
 	{Name: TRANS_UNKNOWN, Src: []string{STATE_IDLE}, Dst: STATE_IDLE},
 	{Name: TRANS_START, Src: []string{STATE_IDLE}, Dst: STATE_IDLE},
-	{Name: TRANS_NEW_EGG, Src: []string{STATE_IDLE}, Dst: STATE_CHOOSE_DATE_TYPE},
+	{Name: TRANS_NEW_EGG, Src: []string{STATE_IDLE}, Dst: STATE_WAIT_DATE},
+	{Name: TRANS_SET_DAY_VALID, Src: []string{STATE_WAIT_DATE}, Dst: STATE_IDLE},
+	{Name: TRANS_SET_DAY_INVALID, Src: []string{STATE_WAIT_DATE}, Dst: STATE_IDLE},
 }
 
 type FSM struct {
@@ -38,9 +42,10 @@ func (f *FSM) Current() string {
 type TelegramCb func()
 
 type TelegramCbs struct {
-	OnUnknownCmd TelegramCb
-	OnStartCmd   TelegramCb
-	OnNewEggCmd  TelegramCb
+	OnUnknownCmd  TelegramCb
+	OnStartCmd    TelegramCb
+	OnNewEggCmd   TelegramCb
+	OnInvalidDate TelegramCb
 }
 
 func NewFSM(cbs TelegramCbs) *FSM {
@@ -49,9 +54,10 @@ func NewFSM(cbs TelegramCbs) *FSM {
 			STATE_IDLE,
 			events,
 			fsm.Callbacks{
-				TRANS_UNKNOWN: func(_ *fsm.Event) { cbs.OnUnknownCmd() },
-				TRANS_START:   func(_ *fsm.Event) { cbs.OnStartCmd() },
-				TRANS_NEW_EGG: func(_ *fsm.Event) { cbs.OnNewEggCmd() },
+				TRANS_UNKNOWN:         func(_ *fsm.Event) { cbs.OnUnknownCmd() },
+				TRANS_START:           func(_ *fsm.Event) { cbs.OnStartCmd() },
+				TRANS_NEW_EGG:         func(_ *fsm.Event) { cbs.OnNewEggCmd() },
+				TRANS_SET_DAY_INVALID: func(_ *fsm.Event) { cbs.OnInvalidDate() },
 			},
 		),
 	}

@@ -7,4 +7,5 @@ const MSG_HELP = `🥚 Ei, Ro*BOT* 🤖
 const MSG_UNKNOWN_COMMAND = `Unbekanntes Kommando.
 Versuche /start für eine kurze Übersicht aller Kommandos\.`
 
-const MSG_NEWEGG_INIT = `Wann laufen die neuen Eier ab?`
+const MSG_NEWEGG_INIT = `Wann laufen die neuen Eier ab?
+Valide Eingaben sind z.B.:` + "\n- `in 14 Tagen`\n- `%s`"

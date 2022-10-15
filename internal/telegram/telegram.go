@@ -76,7 +76,7 @@ func botSetup(api *echotron.API) {
 // This method is needed to implement the echotron.Bot interface.
 func (b *bot) Update(update *echotron.Update) {
 	var event string
-	if strings.HasPrefix(update.Message.Text, "/start") {
+	if strings.HasPrefix(update.Message.Text, CMD_START) {
 		event = logic.TRANS_START
 	} else {
 		event = logic.TRANS_UNKNOWN
@@ -112,13 +112,5 @@ func (b *bot) sendUnknownCommandMsg() {
 
 func (b *bot) sendNewEggInitMsg() {
 	// TODO: check no existing eggs
-	buttonRow := []echotron.KeyboardButton{
-		{Text: "Relativ (z.B. in 14 Tagen)"},
-		{Text: fmt.Sprintf("Absolut (z.B. %s)", time.Now().Add(14*24*time.Hour).Format("02.01.2006"))},
-	}
-	replyMarkup := echotron.ReplyKeyboardMarkup{
-		InputFieldPlaceholder: "Bitte Datum auswählen",
-		Keyboard:              [][]echotron.KeyboardButton{buttonRow},
-	}
-	b.trySendMsg(constants.MSG_NEWEGG_INIT, &echotron.MessageOptions{ReplyMarkup: replyMarkup})
+	b.trySendMsg(fmt.Sprintf(constants.MSG_NEWEGG_INIT, time.Now().Add(14*24*time.Hour).Format("02.01.2006")), nil)
 }
