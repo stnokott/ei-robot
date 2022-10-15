@@ -23,20 +23,22 @@ changelog:
   use: github
   filters:
     exclude:
-      - "^docs:"
-      - typo
-      - "^test:"
-      - "^internal:"
+      - "^style"
+      - "^refactor"
+      - "^test"
+      - "^build"
+      - "^ci"
+
   groups:
     - title: Features
-      regexp: "^.*feat[(\\w)]*:+.*$"
+      regexp: "^feat"
       order: 0
-    - title: "Bug fixes"
-      regexp: "^.*fix[(\\w)]*:+.*$"
-      order: 1
-    - title: "Dependencies"
-      regexp: "^.*deps[(\\w)]*:+.*$"
-      order: 2
+    - title: Bug Fixes
+      regexp: "^fix"
+    - title: Documentation
+      regexp: "^docs"
+    - title: Performance Optimization
+      regexp: "^perf"
     - title: Others
       order: 999
 release:

@@ -1,6 +1,8 @@
 package constants
 
-const MSG_HELP = `🥚 Ei, Ro*BOT* 🤖
+const VERSION = "v0.0.3"
+
+const MSG_HELP = `🥚 Ei, Ro*BOT* 🤖 (` + VERSION + `)
 /start \- Diese Hilfe anzeigen
 /neu \- Neue Eier registrieren`
 
