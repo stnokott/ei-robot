@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"stnokott/eirobot/internal/config"
+	"stnokott/eirobot/internal/store"
 	"stnokott/eirobot/internal/telegram"
 )
 
@@ -11,8 +12,14 @@ func main() {
 	if err != nil {
 		log.Panicf("Error getting configuration: %s", err)
 	}
-	log.Printf("Running with Telegram token '%sXXXXXX:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX%s'", config.TelegramToken[:4], config.TelegramToken[len(config.TelegramToken)-4:])
-	dsp := telegram.NewDispatcher(config.TelegramToken)
+
+	store, err := store.NewStore(config.DbDir)
+	if err != nil {
+		log.Panicf("Error creating store: %s", err)
+	}
+	defer store.Close()
+
+	dsp := telegram.NewDispatcher(config.TelegramToken, store)
 
 	log.Println("Polling...")
 	log.Println(dsp.Poll())

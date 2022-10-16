@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -8,15 +9,17 @@ import (
 
 	"stnokott/eirobot/internal/constants"
 	"stnokott/eirobot/internal/logic"
+	"stnokott/eirobot/internal/store"
 
 	"github.com/NicoNex/echotron/v3"
 )
 
-func NewDispatcher(token string) *echotron.Dispatcher {
+func NewDispatcher(token string, s *store.Store) *echotron.Dispatcher {
 	api := echotron.NewAPI(token)
 	botSetup(&api)
 
-	dsp := echotron.NewDispatcher(token, func(chatId int64) echotron.Bot { return newBot(chatId, api) })
+	dsp := echotron.NewDispatcher(token, func(chatId int64) echotron.Bot { return newBot(chatId, s, api) })
+	log.Printf("Telegram token = %sXXXXXX:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX%s", token[:4], token[len(token)-4:])
 	return dsp
 }
 
@@ -25,6 +28,7 @@ func NewDispatcher(token string) *echotron.Dispatcher {
 type bot struct {
 	chatID int64
 	fsm    *logic.FSM
+	store  *store.Store
 	echotron.API
 }
 
@@ -33,10 +37,11 @@ type bot struct {
 // interacted with the bot before.
 // This means that echotron keeps one instance of the echotron.Bot implementation
 // for each chat where the bot is used.
-func newBot(chatID int64, api echotron.API) echotron.Bot {
+func newBot(chatID int64, s *store.Store, api echotron.API) echotron.Bot {
 	b := &bot{
 		chatID,
 		nil,
+		s,
 		api,
 	}
 	cbs := logic.TelegramCbs{
@@ -44,6 +49,7 @@ func newBot(chatID int64, api echotron.API) echotron.Bot {
 		OnStartCmd:    b.sendHelpMsg,
 		OnNewEggCmd:   b.sendNewEggInitMsg,
 		OnInvalidDate: b.sendInvalidDateMsg,
+		OnGetEggInfo:  b.sendEggInfo,
 	}
 	b.fsm = logic.NewFSM(cbs)
 
@@ -62,9 +68,11 @@ func botSetup(api *echotron.API) {
 	}
 
 	// Chat menu commands
+	// TODO: all via constants (currently duplicated text)
 	cmdStart := echotron.BotCommand{Command: constants.CMD_START, Description: "Hilfetext anzeigen"}
 	cmdNewEgg := echotron.BotCommand{Command: constants.CMD_NEWEGG, Description: "Neues Ei registrieren"}
-	if _, err := api.SetMyCommands(nil, cmdStart, cmdNewEgg); err != nil {
+	cmdEggInfo := echotron.BotCommand{Command: constants.CMD_GETEGG, Description: "Ablaufdatum erfahren"}
+	if _, err := api.SetMyCommands(nil, cmdStart, cmdNewEgg, cmdEggInfo); err != nil {
 		log.Panicf("Error setting command list: %s", err)
 	}
 }
@@ -77,12 +85,13 @@ func (b *bot) Update(update *echotron.Update) {
 		event = logic.TRANS_START
 	} else if strings.HasPrefix(msg, constants.CMD_NEWEGG) {
 		event = logic.TRANS_NEW_EGG
+	} else if strings.HasPrefix(msg, constants.CMD_GETEGG) {
+		event = logic.TRANS_GET_EGG_INFO
 	} else if b.fsm.Current() == logic.STATE_WAIT_DATE {
 		if t, err := tryParseDateStr(msg); err != nil {
 			event = logic.TRANS_SET_DAY_INVALID
 		} else {
-			msg := fmt.Sprintf(constants.MSG_REPLY_DATE, t.Format(`02\.01\.2006`))
-			b.trySendMsg(msg, nil)
+			b.sendConfirmDateMsg(t)
 			event = logic.TRANS_SET_DAY_VALID
 		}
 	} else {
@@ -96,6 +105,7 @@ func (b *bot) Update(update *echotron.Update) {
 var defaultMsgOptions = &echotron.MessageOptions{ParseMode: "MarkdownV2"}
 
 func (b *bot) trySendMsg(s string, opts *echotron.MessageOptions) {
+	// TODO: cleanup message by escaping reserved characters
 	var o *echotron.MessageOptions
 	if opts == nil {
 		o = defaultMsgOptions
@@ -122,6 +132,28 @@ func (b *bot) sendNewEggInitMsg() {
 	b.trySendMsg(fmt.Sprintf(constants.MSG_NEWEGG_INIT, time.Now().Add(14*24*time.Hour).Format("02.01.2006")), nil)
 }
 
+func (b *bot) sendConfirmDateMsg(t time.Time) {
+	if err := b.store.Put(b.chatID, t); err != nil {
+		b.trySendMsg(fmt.Sprintf("Fehler beim Speichern des Datums: %s", err), nil)
+	} else {
+		msg := fmt.Sprintf(constants.MSG_DATE_SAVED, t.Format(constants.DATE_LAYOUT))
+		b.trySendMsg(msg, nil)
+	}
+}
+
 func (b *bot) sendInvalidDateMsg() {
 	b.trySendMsg(constants.MSG_INVALID_DATE, nil)
+}
+
+func (b *bot) sendEggInfo() {
+	t, err := b.store.Get(b.chatID)
+	if err != nil {
+		if errors.Is(err, store.ErrKeyNotFound) {
+			b.trySendMsg(constants.MSG_NO_EGG, nil)
+		} else {
+			b.trySendMsg(fmt.Sprintf("Fehler beim Abruf aus der Datenbank: %s", err), nil)
+		}
+		return
+	}
+	b.trySendMsg(fmt.Sprintf(constants.MSG_EGG_INFO, t.Format(constants.DATE_LAYOUT)), nil)
 }

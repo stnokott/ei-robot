@@ -14,6 +14,7 @@ const (
 	TRANS_NEW_EGG         string = "TRANS_NEW_EGG"
 	TRANS_SET_DAY_VALID   string = "TRANS_SET_DAY"
 	TRANS_SET_DAY_INVALID string = "TRANS_SET_DAY_INVALID"
+	TRANS_GET_EGG_INFO    string = "TRANS_GET_EGG_INFO"
 )
 
 var events = fsm.Events{
@@ -22,6 +23,7 @@ var events = fsm.Events{
 	{Name: TRANS_NEW_EGG, Src: []string{STATE_IDLE}, Dst: STATE_WAIT_DATE},
 	{Name: TRANS_SET_DAY_VALID, Src: []string{STATE_WAIT_DATE}, Dst: STATE_IDLE},
 	{Name: TRANS_SET_DAY_INVALID, Src: []string{STATE_WAIT_DATE}, Dst: STATE_WAIT_DATE},
+	{Name: TRANS_GET_EGG_INFO, Src: []string{STATE_IDLE}, Dst: STATE_IDLE},
 }
 
 type FSM struct {
@@ -50,6 +52,7 @@ type TelegramCbs struct {
 	OnStartCmd    TelegramCb
 	OnNewEggCmd   TelegramCb
 	OnInvalidDate TelegramCb
+	OnGetEggInfo  TelegramCb
 }
 
 func NewFSM(cbs TelegramCbs) *FSM {
@@ -62,6 +65,7 @@ func NewFSM(cbs TelegramCbs) *FSM {
 				TRANS_START:           func(_ *fsm.Event) { cbs.OnStartCmd() },
 				TRANS_NEW_EGG:         func(_ *fsm.Event) { cbs.OnNewEggCmd() },
 				TRANS_SET_DAY_INVALID: func(_ *fsm.Event) { cbs.OnInvalidDate() },
+				TRANS_GET_EGG_INFO:    func(_ *fsm.Event) { cbs.OnGetEggInfo() },
 			},
 		),
 	}
