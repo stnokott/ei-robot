@@ -20,19 +20,26 @@ builds:
 changelog:
   sort: asc
   abbrev: -1
-  use: github-native
+  use: github
   filters:
     exclude:
-      - "^docs:"
-      - typo
-      - "^test:"
+      - "^style"
+      - "^refactor"
+      - "^test"
+      - "^build"
+      - "^ci"
+      - "^bump"
+
   groups:
     - title: Features
-      regexp: "^.*feat[(\\w)]*:+.*$"
+      regexp: "^feat"
       order: 0
-    - title: "Bug fixes"
-      regexp: "^.*fix[(\\w)]*:+.*$"
-      order: 1
+    - title: Bug Fixes
+      regexp: "^fix"
+    - title: Documentation
+      regexp: "^docs"
+    - title: Performance Optimization
+      regexp: "^perf"
     - title: Others
       order: 999
 release:
@@ -86,12 +93,12 @@ announce:
     enabled: true
     chat_id: 725149271
     message_template: |
-      GoReleaser-Benachrichtigung:
+      *GoReleaser-Benachrichtigung:*
 
-      Neue Version {{ .Version }} für {{ .ProjectName }} veröffentlicht!
+      Neue Version *{{ .Version }}* für *{{ .ProjectName }}* veröffentlicht!
       Release Notes:
       {{ .ReleaseNotes }}
 
-      docker pull ghcr.io/stnokott/{{ .ProjectName }}:{{ .Version }}
+      `docker pull ghcr.io/stnokott/{{ .ProjectName }}:{{ .Version }}`
 
       {{ .GitURL }}

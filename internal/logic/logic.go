@@ -1,18 +1,29 @@
 package logic
 
 import (
+	"log"
+
 	"github.com/looplab/fsm"
 )
 
 const (
-	STATE_IDLE    string = "STATE_IDLE"
-	TRANS_START   string = "TRANS_START"
-	TRANS_UNKNOWN string = "TRANS_UNKNOWN"
+	STATE_IDLE            string = "STATE_IDLE"
+	STATE_WAIT_DATE       string = "STATE_WAIT_DATE"
+	TRANS_UNKNOWN         string = "TRANS_UNKNOWN"
+	TRANS_START           string = "TRANS_START"
+	TRANS_NEW_EGG         string = "TRANS_NEW_EGG"
+	TRANS_SET_DAY_VALID   string = "TRANS_SET_DAY"
+	TRANS_SET_DAY_INVALID string = "TRANS_SET_DAY_INVALID"
+	TRANS_GET_EGG_INFO    string = "TRANS_GET_EGG_INFO"
 )
 
 var events = fsm.Events{
-	{Name: TRANS_START, Src: []string{STATE_IDLE}, Dst: STATE_IDLE},
 	{Name: TRANS_UNKNOWN, Src: []string{STATE_IDLE}, Dst: STATE_IDLE},
+	{Name: TRANS_START, Src: []string{STATE_IDLE}, Dst: STATE_IDLE},
+	{Name: TRANS_NEW_EGG, Src: []string{STATE_IDLE}, Dst: STATE_WAIT_DATE},
+	{Name: TRANS_SET_DAY_VALID, Src: []string{STATE_WAIT_DATE}, Dst: STATE_IDLE},
+	{Name: TRANS_SET_DAY_INVALID, Src: []string{STATE_WAIT_DATE}, Dst: STATE_WAIT_DATE},
+	{Name: TRANS_GET_EGG_INFO, Src: []string{STATE_IDLE}, Dst: STATE_IDLE},
 }
 
 type FSM struct {
@@ -20,10 +31,13 @@ type FSM struct {
 }
 
 func (f *FSM) Event(e string) error {
+	log.Printf("attempting FSM transition %s", e)
 	err := f.fsm.Event(e)
 	if _, ok := err.(fsm.NoTransitionError); ok || err == nil {
+		log.Printf(">> new state: %s", f.fsm.Current())
 		return nil
 	}
+	// TODO: catch invalid transition
 	return err
 }
 
@@ -34,8 +48,11 @@ func (f *FSM) Current() string {
 type TelegramCb func()
 
 type TelegramCbs struct {
-	OnStartCmd   TelegramCb
-	OnUnknownCmd TelegramCb
+	OnUnknownCmd  TelegramCb
+	OnStartCmd    TelegramCb
+	OnNewEggCmd   TelegramCb
+	OnInvalidDate TelegramCb
+	OnGetEggInfo  TelegramCb
 }
 
 func NewFSM(cbs TelegramCbs) *FSM {
@@ -44,8 +61,11 @@ func NewFSM(cbs TelegramCbs) *FSM {
 			STATE_IDLE,
 			events,
 			fsm.Callbacks{
-				TRANS_START:   func(_ *fsm.Event) { cbs.OnStartCmd() },
-				TRANS_UNKNOWN: func(_ *fsm.Event) { cbs.OnUnknownCmd() },
+				TRANS_UNKNOWN:         func(_ *fsm.Event) { cbs.OnUnknownCmd() },
+				TRANS_START:           func(_ *fsm.Event) { cbs.OnStartCmd() },
+				TRANS_NEW_EGG:         func(_ *fsm.Event) { cbs.OnNewEggCmd() },
+				TRANS_SET_DAY_INVALID: func(_ *fsm.Event) { cbs.OnInvalidDate() },
+				TRANS_GET_EGG_INFO:    func(_ *fsm.Event) { cbs.OnGetEggInfo() },
 			},
 		),
 	}
