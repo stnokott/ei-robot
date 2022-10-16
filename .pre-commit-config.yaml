@@ -9,10 +9,6 @@ repos:
     repo: https://github.com/lietu/go-pre-commit
     rev: v0.0.1
   - hooks:
-      - id: remove-crlf
-    repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.3.1
-  - hooks:
       - id: commitizen
     repo: https://github.com/commitizen-tools/commitizen
     rev: v2.35.0
