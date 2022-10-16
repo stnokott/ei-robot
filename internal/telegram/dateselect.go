@@ -19,7 +19,7 @@ const (
 var regexDateRel = regexp.MustCompile(fmt.Sprintf(`(?:(?:in)|(?:nach)) (\d+) ((?:(?:%s)|(?:%s)|(?:%s)|(?:%s)))e?n?`, uHour, uDay, uMonth, uYear))
 
 // Tries to understand inputs as defined in constants.MSG_NEWEGG_INIT
-func parseDateStr(s string) (time.Time, error) {
+func tryParseDateStr(s string) (time.Time, error) {
 	match := regexDateRel.FindStringSubmatch(s)
 	if len(match) > 0 {
 		return parseDateRel(match[1], match[2])
@@ -38,13 +38,13 @@ func parseDateRel(quantStr string, unit string) (time.Time, error) {
 	t := time.Now()
 	switch unit {
 	case uHour:
-		t.Add((time.Duration)(quant) * time.Hour)
+		t = t.Add((time.Duration)(quant) * time.Hour)
 	case uDay:
-		t.AddDate(0, 0, int(quant))
+		t = t.AddDate(0, 0, int(quant))
 	case uMonth:
-		t.AddDate(0, int(quant), 0)
+		t = t.AddDate(0, int(quant), 0)
 	case uYear:
-		t.AddDate(int(quant), 0, 0)
+		t = t.AddDate(int(quant), 0, 0)
 	default:
 		return time.Time{}, fmt.Errorf("invalid time unit '%s'", unit)
 	}

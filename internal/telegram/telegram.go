@@ -49,11 +49,6 @@ func newBot(chatID int64, api echotron.API) echotron.Bot {
 	return b
 }
 
-const (
-	CMD_START  string = "/start"
-	CMD_NEWEGG string = "/new_egg"
-)
-
 func botSetup(api *echotron.API) {
 	// Chat Menu => commands
 	mbOpts := echotron.SetChatMenuButtonOptions{
@@ -66,8 +61,8 @@ func botSetup(api *echotron.API) {
 	}
 
 	// Chat menu commands
-	cmdStart := echotron.BotCommand{Command: CMD_START, Description: "Hilfetext anzeigen"}
-	cmdNewEgg := echotron.BotCommand{Command: CMD_NEWEGG, Description: "Neues Ei registrieren"}
+	cmdStart := echotron.BotCommand{Command: constants.CMD_START, Description: "Hilfetext anzeigen"}
+	cmdNewEgg := echotron.BotCommand{Command: constants.CMD_NEWEGG, Description: "Neues Ei registrieren"}
 	if _, err := api.SetMyCommands(nil, cmdStart, cmdNewEgg); err != nil {
 		log.Panicf("Error setting command list: %s", err)
 	}
@@ -75,9 +70,20 @@ func botSetup(api *echotron.API) {
 
 // This method is needed to implement the echotron.Bot interface.
 func (b *bot) Update(update *echotron.Update) {
+	msg := update.Message.Text
 	var event string
-	if strings.HasPrefix(update.Message.Text, CMD_START) {
+	if strings.HasPrefix(msg, constants.CMD_START) {
 		event = logic.TRANS_START
+	} else if strings.HasPrefix(msg, constants.CMD_NEWEGG) {
+		event = logic.TRANS_NEW_EGG
+	} else if b.fsm.Current() == logic.STATE_WAIT_DATE {
+		if t, err := tryParseDateStr(msg); err != nil {
+			event = logic.TRANS_SET_DAY_INVALID
+		} else {
+			msg := fmt.Sprintf(constants.MSG_REPLY_DATE, t.Format(`02\.01\.2006`))
+			b.trySendMsg(msg, nil)
+			event = logic.TRANS_SET_DAY_VALID
+		}
 	} else {
 		event = logic.TRANS_UNKNOWN
 	}
