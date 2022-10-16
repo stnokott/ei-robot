@@ -43,6 +43,7 @@ changelog:
     - title: Others
       order: 999
 release:
+  target_commitish: "{{ .Commit }}"
   github:
     owner: stnokott
     name: ei-robot
