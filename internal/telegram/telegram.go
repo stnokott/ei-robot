@@ -40,9 +40,10 @@ func newBot(chatID int64, api echotron.API) echotron.Bot {
 		api,
 	}
 	cbs := logic.TelegramCbs{
-		OnUnknownCmd: b.sendUnknownCommandMsg,
-		OnStartCmd:   b.sendHelpMsg,
-		OnNewEggCmd:  b.sendNewEggInitMsg,
+		OnUnknownCmd:  b.sendUnknownCommandMsg,
+		OnStartCmd:    b.sendHelpMsg,
+		OnNewEggCmd:   b.sendNewEggInitMsg,
+		OnInvalidDate: b.sendInvalidDateMsg,
 	}
 	b.fsm = logic.NewFSM(cbs)
 
@@ -119,4 +120,8 @@ func (b *bot) sendUnknownCommandMsg() {
 func (b *bot) sendNewEggInitMsg() {
 	// TODO: check no existing eggs
 	b.trySendMsg(fmt.Sprintf(constants.MSG_NEWEGG_INIT, time.Now().Add(14*24*time.Hour).Format("02.01.2006")), nil)
+}
+
+func (b *bot) sendInvalidDateMsg() {
+	b.trySendMsg(constants.MSG_INVALID_DATE, nil)
 }

@@ -21,7 +21,7 @@ var events = fsm.Events{
 	{Name: TRANS_START, Src: []string{STATE_IDLE}, Dst: STATE_IDLE},
 	{Name: TRANS_NEW_EGG, Src: []string{STATE_IDLE}, Dst: STATE_WAIT_DATE},
 	{Name: TRANS_SET_DAY_VALID, Src: []string{STATE_WAIT_DATE}, Dst: STATE_IDLE},
-	{Name: TRANS_SET_DAY_INVALID, Src: []string{STATE_WAIT_DATE}, Dst: STATE_IDLE},
+	{Name: TRANS_SET_DAY_INVALID, Src: []string{STATE_WAIT_DATE}, Dst: STATE_WAIT_DATE},
 }
 
 type FSM struct {
