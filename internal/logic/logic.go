@@ -1,6 +1,8 @@
 package logic
 
 import (
+	"log"
+
 	"github.com/looplab/fsm"
 )
 
@@ -27,8 +29,10 @@ type FSM struct {
 }
 
 func (f *FSM) Event(e string) error {
+	log.Printf("attempting FSM transition %s", e)
 	err := f.fsm.Event(e)
 	if _, ok := err.(fsm.NoTransitionError); ok || err == nil {
+		log.Printf(">> new state: %s", f.fsm.Current())
 		return nil
 	}
 	// TODO: catch invalid transition

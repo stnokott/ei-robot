@@ -1,22 +1,30 @@
 repos:
-  - repo: https://github.com/golangci/golangci-lint
-    rev: v1.49.0
-    hooks:
+  - hooks:
       - id: golangci-lint
-  - repo: https://github.com/lietu/go-pre-commit
-    rev: v0.0.1
-    hooks:
+    repo: https://github.com/golangci/golangci-lint
+    rev: v1.50.0
+  - hooks:
       - id: go-test
       - id: go-vet
-  - repo: local
-    hooks:
-      - id: go-mod-tidy
+    repo: https://github.com/lietu/go-pre-commit
+    rev: v0.0.1
+  - hooks:
+      - id: remove-crlf
+    repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.3.1
+  - hooks:
+      - id: commitizen
+    repo: https://github.com/commitizen-tools/commitizen
+    rev: v2.35.0
+  - hooks:
+      - entry: go mod tidy
+        id: go-mod-tidy
+        language: system
         name: go-mod-tidy
-        entry: go mod tidy
-        language: system
         pass_filenames: false
-      - id: go-fmt
+      - entry: go fmt
+        id: go-fmt
+        language: system
         name: go-fmt
-        entry: go fmt
-        language: system
         pass_filenames: false
+    repo: local
