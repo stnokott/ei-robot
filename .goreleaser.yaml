@@ -28,6 +28,7 @@ changelog:
       - "^test"
       - "^build"
       - "^ci"
+      - "^bump"
 
   groups:
     - title: Features
