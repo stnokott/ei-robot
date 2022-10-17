@@ -3,8 +3,7 @@ updates:
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
-      interval: "monthly"
-      day: "sunday"
+      interval: "daily"
       timezone: "Europe/Berlin"
     assignees:
       - "stnokott"
@@ -13,8 +12,7 @@ updates:
   - directory: "/"
     package-ecosystem: gomod
     schedule:
-      interval: "weekly"
-      day: "sunday"
+      interval: "daily"
       timezone: "Europe/Berlin"
     assignees:
       - "stnokott"
