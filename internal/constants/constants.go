@@ -40,8 +40,7 @@ const MSG_INVALID_DATE = `Das ist keine gültige Datumsangabe\. Bitte versuche e
 
 const MSG_DATE_SAVED = `*%s* erfolgreich gespeichert\.`
 
-// FIXME: remove code ticks
-const MSG_NO_EGG = "Du hast noch keine Eier registriert\\. Verwende dafür `" + CMD_NEWEGG + "`\\."
+const MSG_NO_EGG = "Du hast noch keine Eier registriert\\. Verwende dafür " + CMD_NEWEGG + "\\."
 
 const MSG_EGG_INFO = `Deine Eier laufen am *%s* ab\.`
 
