@@ -49,6 +49,7 @@ func newBot(chatID int64, s *store.Store, api echotron.API) echotron.Bot {
 		OnUnknownCmd:          b.sendUnknownCommandMsg,
 		OnStartCmd:            b.sendHelpMsg,
 		OnNewEggCmd:           b.sendNewEggInitMsg,
+		OnEggsExist:           b.sendEggsAlreadyExistMsg,
 		OnInvalidDate:         b.sendInvalidDateMsg,
 		OnGetEggInfo:          b.sendEggInfo,
 		OnDelEggRequest:       b.sendDelEggRequestInfo,
@@ -94,7 +95,7 @@ func (b *bot) Update(update *echotron.Update) {
 	if strings.HasPrefix(msg, constants.CMD_START) {
 		event = logic.TRANS_START
 	} else if strings.HasPrefix(msg, constants.CMD_NEWEGG) {
-		event = logic.TRANS_NEW_EGG
+		event = b.handleNewEggRequest()
 	} else if strings.HasPrefix(msg, constants.CMD_GETEGG) {
 		event = logic.TRANS_GET_EGG_INFO
 	} else if strings.HasPrefix(msg, constants.CMD_DELETEEGG) {
@@ -162,9 +163,32 @@ func (b *bot) sendUnknownCommandMsg() {
 	b.trySendMsg(constants.MSG_UNKNOWN_COMMAND, nil)
 }
 
+func (b *bot) handleNewEggRequest() (event string) {
+	_, err := b.store.Get(b.chatID)
+	if err != nil {
+		if errors.Is(err, store.ErrKeyNotFound) {
+			event = logic.TRANS_NEW_EGG
+		} else {
+			b.trySendMsg(fmt.Sprintf("Fehler beim Abruf aus der Datenbank: %s", err), nil)
+			event = logic.TRANS_SILENT_CANCEL
+		}
+	} else {
+		event = logic.TRANS_EGGS_ALREADY_EXISTS
+	}
+	return
+}
+
 func (b *bot) sendNewEggInitMsg() {
-	// TODO: check no existing eggs
 	b.trySendMsg(fmt.Sprintf(constants.MSG_NEWEGG_INIT, time.Now().Add(14*24*time.Hour).Format("02.01.2006")), nil)
+}
+
+func (b *bot) sendEggsAlreadyExistMsg() {
+	t, err := b.store.Get(b.chatID)
+	if err != nil {
+		b.trySendMsg(fmt.Sprintf("Fehler beim Abruf aus der Datenbank: %s", err), nil)
+	} else {
+		b.trySendMsg(fmt.Sprintf(constants.MSG_EGGS_EXIST, constants.FormatDate(t)), nil)
+	}
 }
 
 func (b *bot) sendConfirmDateMsg(t time.Time) {

@@ -13,6 +13,7 @@ const (
 	TRANS_UNKNOWN              string = "TRANS_UNKNOWN"
 	TRANS_SILENT_CANCEL        string = "TRANS_SILENT_CANCEL"
 	TRANS_START                string = "TRANS_START"
+	TRANS_EGGS_ALREADY_EXISTS  string = "TRANS_ALREADY_EXISTS"
 	TRANS_NEW_EGG              string = "TRANS_NEW_EGG"
 	TRANS_SET_DAY_VALID        string = "TRANS_SET_DAY"
 	TRANS_SET_DAY_INVALID      string = "TRANS_SET_DAY_INVALID"
@@ -29,6 +30,7 @@ const (
 var events = fsm.Events{
 	{Name: TRANS_UNKNOWN, Src: []string{STATE_IDLE}, Dst: STATE_IDLE},
 	{Name: TRANS_START, Src: []string{STATE_IDLE}, Dst: STATE_IDLE},
+	{Name: TRANS_EGGS_ALREADY_EXISTS, Src: []string{STATE_IDLE}, Dst: STATE_IDLE},
 	{Name: TRANS_NEW_EGG, Src: []string{STATE_IDLE}, Dst: STATE_WAIT_DATE},
 	{Name: TRANS_SET_DAY_VALID, Src: []string{STATE_WAIT_DATE}, Dst: STATE_IDLE},
 	{Name: TRANS_SET_DAY_INVALID, Src: []string{STATE_WAIT_DATE}, Dst: STATE_WAIT_DATE},
@@ -65,6 +67,7 @@ type TelegramCb func()
 type TelegramCbs struct {
 	OnUnknownCmd          TelegramCb
 	OnStartCmd            TelegramCb
+	OnEggsExist           TelegramCb
 	OnNewEggCmd           TelegramCb
 	OnInvalidDate         TelegramCb
 	OnGetEggInfo          TelegramCb
@@ -81,12 +84,13 @@ func NewFSM(cbs *TelegramCbs) *FSM {
 			STATE_IDLE,
 			events,
 			fsm.Callbacks{
-				TRANS_UNKNOWN:         func(_ *fsm.Event) { cbs.OnUnknownCmd() },
-				TRANS_START:           func(_ *fsm.Event) { cbs.OnStartCmd() },
-				TRANS_NEW_EGG:         func(_ *fsm.Event) { cbs.OnNewEggCmd() },
-				TRANS_SET_DAY_INVALID: func(_ *fsm.Event) { cbs.OnInvalidDate() },
-				TRANS_GET_EGG_INFO:    func(_ *fsm.Event) { cbs.OnGetEggInfo() },
-				TRANS_DEL_EGG:         func(_ *fsm.Event) { cbs.OnDelEggRequest() },
+				TRANS_UNKNOWN:             func(_ *fsm.Event) { cbs.OnUnknownCmd() },
+				TRANS_START:               func(_ *fsm.Event) { cbs.OnStartCmd() },
+				TRANS_EGGS_ALREADY_EXISTS: func(_ *fsm.Event) { cbs.OnEggsExist() },
+				TRANS_NEW_EGG:             func(_ *fsm.Event) { cbs.OnNewEggCmd() },
+				TRANS_SET_DAY_INVALID:     func(_ *fsm.Event) { cbs.OnInvalidDate() },
+				TRANS_GET_EGG_INFO:        func(_ *fsm.Event) { cbs.OnGetEggInfo() },
+				TRANS_DEL_EGG:             func(_ *fsm.Event) { cbs.OnDelEggRequest() },
 				TRANS_YES: func(e *fsm.Event) {
 					if e.Src == STATE_WAIT_DEL_CONFIRM {
 						cbs.OnDelEggConfirm()
