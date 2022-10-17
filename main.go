@@ -3,11 +3,14 @@ package main
 import (
 	"log"
 	"stnokott/eirobot/internal/config"
+	"stnokott/eirobot/internal/constants"
 	"stnokott/eirobot/internal/store"
 	"stnokott/eirobot/internal/telegram"
 )
 
 func main() {
+	log.Printf("<<<<< Ei, Robot %s >>>>>", constants.VERSION)
+
 	config, err := config.New()
 	if err != nil {
 		log.Panicf("Error getting configuration: %s", err)
