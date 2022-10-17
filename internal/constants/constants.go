@@ -59,4 +59,8 @@ Bitte zuerst mit ` + CMD_DELETEEGG + ` löschen, um neue zu registrieren\.`
 	MSG_DELETED              = `Erfolgreich gelöscht\.`
 	MSG_CANCELLED            = `Abgebrochen\.`
 	MSG_NOTHING_TO_CANCEL    = `Keine Operation im Gange\.`
+	MSG_MISSED_EXPIRY        = `Hallo!
+Ich wurde gerade neugestartet und habe festgestellt, dass deine Eier sind %s abgelaufen sind\.
+Aus irgendeinem Grund habe ich dir aber keine Nachricht geschickt\.
+*Entschuldigung!* 😔`
 )
