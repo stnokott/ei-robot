@@ -74,12 +74,11 @@ func botSetup(api *echotron.API) {
 	}
 
 	// Chat menu commands
-	// TODO: all via constants (currently duplicated text)
 	cmds := []echotron.BotCommand{
-		{Command: constants.CMD_START, Description: "Hilfetext anzeigen"},
-		{Command: constants.CMD_NEWEGG, Description: "Neues Ei registrieren"},
-		{Command: constants.CMD_GETEGG, Description: "Ablaufdatum erfahren"},
-		{Command: constants.CMD_DELETEEGG, Description: "Registrierte Eier löschen"},
+		{Command: constants.CMD_START, Description: constants.DESC_CMD_START},
+		{Command: constants.CMD_NEWEGG, Description: constants.DESC_CMD_NEWEGG},
+		{Command: constants.CMD_GETEGG, Description: constants.DESC_CMD_GETEGG},
+		{Command: constants.CMD_DELETEEGG, Description: constants.DESC_CMD_DELETEEGG},
 	}
 
 	if _, err := api.SetMyCommands(nil, cmds...); err != nil {
