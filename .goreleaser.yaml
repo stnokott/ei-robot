@@ -95,8 +95,6 @@ announce:
     enabled: true
     chat_id: 725149271
     message_template: |
-      *GoReleaser-Benachrichtigung:*
-
       Neue Version *{{ .Version }}* für *{{ .ProjectName }}* veröffentlicht!
       Release Notes:
       {{ .ReleaseNotes }}
