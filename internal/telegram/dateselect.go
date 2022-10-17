@@ -10,13 +10,12 @@ import (
 )
 
 const (
-	uHour  string = "Stunde"
 	uDay   string = "Tag"
 	uMonth string = "Monat"
 	uYear  string = "Jahr"
 )
 
-var regexDateRel = regexp.MustCompile(fmt.Sprintf(`(?:(?:in)|(?:nach)) (\d+) ((?:(?:%s)|(?:%s)|(?:%s)|(?:%s)))e?n?`, uHour, uDay, uMonth, uYear))
+var regexDateRel = regexp.MustCompile(fmt.Sprintf(`(?:(?:in)|(?:nach)) (\d+) ((?:(?:%s)|(?:%s)|(?:%s)))e?n?`, uDay, uMonth, uYear))
 
 // Tries to understand inputs as defined in constants.MSG_NEWEGG_INIT
 func tryParseDateStr(s string) (time.Time, error) {
@@ -35,10 +34,9 @@ func parseDateRel(quantStr string, unit string) (time.Time, error) {
 	if err != nil {
 		return time.Time{}, err
 	}
-	t := time.Now()
+	// truncate to DAY
+	t := time.Now().Truncate(24 * time.Hour)
 	switch unit {
-	case uHour:
-		t = t.Add((time.Duration)(quant) * time.Hour)
 	case uDay:
 		t = t.AddDate(0, 0, int(quant))
 	case uMonth:

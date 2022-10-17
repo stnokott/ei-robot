@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-const VERSION = "v0.3.0"
+const VERSION = "v0.4.0"
 
 const (
 	CMD_START          string = "/start"
@@ -48,9 +48,10 @@ const (
 	Versuche /start für eine kurze Übersicht aller Kommandos\.`
 	MSG_NEWEGG_INIT = `Wann laufen die neuen Eier ab?
 Valide Eingaben sind z\.B\.:` + "\n\\- `in 14 Tagen`\n\\- `%s`"
-	MSG_INVALID_DATE = `Das ist keine gültige Datumsangabe\. Bitte versuche es noch einmal\.`
-	MSG_DATE_SAVED   = `Auslaufdatum *%s* erfolgreich gespeichert\.`
-	MSG_EGGS_EXIST   = `Es sind bereits Eier registiert, die am *%s* auslaufen\.
+	MSG_INVALID_DATE = `Das ist keine gültige Datumsangabe \(Stunden und kleinere Einheiten sind nicht unterstützt\)\.
+Bitte versuche es noch einmal\.`
+	MSG_DATE_SAVED = `Auslaufdatum *%s* erfolgreich gespeichert\.`
+	MSG_EGGS_EXIST = `Es sind bereits Eier registiert, die am *%s* auslaufen\.
 Bitte zuerst mit ` + CMD_DELETEEGG + ` löschen, um neue zu registrieren\.`
 	MSG_NO_EGG               = "Du hast noch keine Eier registriert\\. Verwende dafür " + CMD_NEWEGG + "\\."
 	MSG_EGG_INFO             = `Deine Eier laufen am *%s* ab\.`
@@ -59,4 +60,8 @@ Bitte zuerst mit ` + CMD_DELETEEGG + ` löschen, um neue zu registrieren\.`
 	MSG_DELETED              = `Erfolgreich gelöscht\.`
 	MSG_CANCELLED            = `Abgebrochen\.`
 	MSG_NOTHING_TO_CANCEL    = `Keine Operation im Gange\.`
+	MSG_MISSED_EXPIRY        = `Hallo!
+Ich wurde gerade neugestartet und habe festgestellt, dass deine Eier sind %s abgelaufen sind\.
+Aus irgendeinem Grund habe ich dir aber keine Nachricht geschickt\.
+*Entschuldigung!* 😔`
 )

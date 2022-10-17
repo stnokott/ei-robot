@@ -18,6 +18,7 @@ import (
 func NewDispatcher(token string, s *store.Store) *echotron.Dispatcher {
 	api := echotron.NewAPI(token)
 	botSetup(&api)
+	checkExpired(&api, s)
 
 	dsp := echotron.NewDispatcher(token, func(chatId int64) echotron.Bot { return newBot(chatId, s, api) })
 	log.Printf("Telegram token = %sXXXXXX:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX%s", token[:4], token[len(token)-4:])
@@ -64,6 +65,7 @@ func newBot(chatID int64, s *store.Store, api echotron.API) echotron.Bot {
 }
 
 func botSetup(api *echotron.API) {
+	log.Println("Running bot setup")
 	// Chat Menu => commands
 	mbOpts := echotron.SetChatMenuButtonOptions{
 		MenuButton: echotron.MenuButton{
@@ -85,6 +87,24 @@ func botSetup(api *echotron.API) {
 
 	if _, err := api.SetMyCommands(nil, cmds...); err != nil {
 		log.Panicf("Error setting command list: %s", err)
+	}
+}
+
+func checkExpired(api *echotron.API, store *store.Store) {
+	log.Println("Checking for missed expiration notifications")
+	chatIDs, times, err := store.GetExpiredChats()
+	if err != nil {
+		log.Panicf("could not get expired chats: %s", err)
+	}
+	log.Printf(">> %d missed notifications", len(chatIDs))
+	for i, chatID := range chatIDs {
+		_, err = api.SendMessage(fmt.Sprintf(constants.MSG_MISSED_EXPIRY, constants.FormatDate(times[i])), chatID, &defaultMsgOptions)
+		if err != nil {
+			log.Printf("could not send missed expiry notification to %d", chatID)
+		}
+		if err = store.Delete(chatID); err != nil {
+			log.Printf("could not delete missed expiry value for %d: %s", chatID, err)
+		}
 	}
 }
 
