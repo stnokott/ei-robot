@@ -13,10 +13,12 @@ const (
 	CMD_NEWEGG         string = "/neu"
 	CMD_GETEGG         string = "/info"
 	CMD_DELETEEGG      string = "/del"
+	CMD_CANCEL         string = "/cancel"
 	DESC_CMD_START     string = "Hilfetext anzeigen"
 	DESC_CMD_NEWEGG    string = "Neues Ei registrieren"
 	DESC_CMD_GETEGG    string = "Ablaufdatum erfahren"
 	DESC_CMD_DELETEEGG string = "Registrierte Eier löschen"
+	DESC_CMD_CANCEL    string = "Aktuelle Operation abbrechen"
 	REPLY_YES          string = "Ja"
 	REPLY_NO           string = "Nein"
 )
@@ -32,7 +34,14 @@ var MSG_HELP string = fmt.Sprintf(`🥚 Ei, Ro*BOT* 🤖 \(%s\)
 %s \- %s
 %s \- %s
 %s \- %s
-`, strings.ReplaceAll(VERSION, `.`, `\.`), CMD_START, DESC_CMD_START, CMD_NEWEGG, DESC_CMD_NEWEGG, CMD_GETEGG, DESC_CMD_GETEGG, CMD_DELETEEGG, DESC_CMD_DELETEEGG)
+%s \- %s
+`, strings.ReplaceAll(VERSION, `.`, `\.`),
+	CMD_START, DESC_CMD_START,
+	CMD_NEWEGG, DESC_CMD_NEWEGG,
+	CMD_GETEGG, DESC_CMD_GETEGG,
+	CMD_DELETEEGG, DESC_CMD_DELETEEGG,
+	CMD_CANCEL, DESC_CMD_CANCEL,
+)
 
 const (
 	MSG_UNKNOWN_COMMAND = `Unbekanntes Kommando\.
@@ -47,4 +56,5 @@ Valide Eingaben sind z\.B\.:` + "\n\\- `in 14 Tagen`\n\\- `%s`"
 	MSG_INVALID_CONFIRMATION = `Ungültige Eingabe, bitte benutze die vorgegebenen Buttons\.`
 	MSG_DELETED              = `Erfolgreich gelöscht\.`
 	MSG_CANCELLED            = `Abgebrochen\.`
+	MSG_NOTHING_TO_CANCEL    = `Keine Operation im Gange\.`
 )

@@ -23,9 +23,8 @@ const (
 	TRANS_YES                  string = "TRANS_YES"
 	TRANS_NO                   string = "TRANS_NO"
 	TRANS_INVALID_CONFIRMATION string = "TRANS_INVALID_CONFIRMATION"
+	TRANS_CANCEL               string = "TRANS_CANCEL"
 )
-
-// TODO: /cancel
 
 var events = fsm.Events{
 	{Name: TRANS_UNKNOWN, Src: []string{STATE_IDLE}, Dst: STATE_IDLE},
@@ -40,6 +39,7 @@ var events = fsm.Events{
 	{Name: TRANS_DEL_EGG_NO_EGG, Src: []string{STATE_IDLE}, Dst: STATE_IDLE},
 	{Name: TRANS_INVALID_CONFIRMATION, Src: []string{STATE_WAIT_DEL_CONFIRM}, Dst: STATE_WAIT_DEL_CONFIRM},
 	{Name: TRANS_SILENT_CANCEL, Src: []string{STATE_IDLE}, Dst: STATE_IDLE},
+	{Name: TRANS_CANCEL, Src: []string{STATE_IDLE, STATE_WAIT_DATE, STATE_WAIT_DEL_CONFIRM}, Dst: STATE_IDLE},
 }
 
 type FSM struct {

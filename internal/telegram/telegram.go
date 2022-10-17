@@ -79,6 +79,7 @@ func botSetup(api *echotron.API) {
 		{Command: constants.CMD_NEWEGG, Description: constants.DESC_CMD_NEWEGG},
 		{Command: constants.CMD_GETEGG, Description: constants.DESC_CMD_GETEGG},
 		{Command: constants.CMD_DELETEEGG, Description: constants.DESC_CMD_DELETEEGG},
+		{Command: constants.CMD_CANCEL, Description: constants.DESC_CMD_CANCEL},
 	}
 
 	if _, err := api.SetMyCommands(nil, cmds...); err != nil {
@@ -98,6 +99,13 @@ func (b *bot) Update(update *echotron.Update) {
 		event = logic.TRANS_GET_EGG_INFO
 	} else if strings.HasPrefix(msg, constants.CMD_DELETEEGG) {
 		event = b.handleDelEggRequest()
+	} else if strings.HasPrefix(msg, constants.CMD_CANCEL) {
+		event = logic.TRANS_CANCEL
+		if b.fsm.Current() == logic.STATE_IDLE {
+			b.sendNothingCancelled()
+		} else {
+			b.sendCancelled()
+		}
 	} else if b.fsm.Current() == logic.STATE_WAIT_DATE {
 		if t, err := tryParseDateStr(msg); err != nil {
 			event = logic.TRANS_SET_DAY_INVALID
@@ -120,7 +128,7 @@ func (b *bot) Update(update *echotron.Update) {
 		log.Printf("Error triggering FSM event %s at state %s: %s", event, b.fsm.Current(), err)
 		b.trySendMsg("Das hätte nicht passieren dürfen, bitte folgenden Fehler an den Entwickler schicken:", nil)
 		b.trySendMsg("```"+strings.ReplaceAll(err.Error(), "`", "\\`")+"```", nil)
-		// TODO: cancel afterwards
+		_ = b.fsm.Event(logic.TRANS_CANCEL)
 	}
 }
 
@@ -239,4 +247,8 @@ func (b *bot) sendNoEggsInfo() {
 
 func (b *bot) sendCancelled() {
 	b.trySendMsg(constants.MSG_CANCELLED, nil)
+}
+
+func (b *bot) sendNothingCancelled() {
+	b.trySendMsg(constants.MSG_NOTHING_TO_CANCEL, nil)
 }
