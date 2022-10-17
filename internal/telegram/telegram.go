@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"time"
 
@@ -123,8 +124,9 @@ func (b *bot) Update(update *echotron.Update) {
 
 var defaultMsgOptions = echotron.MessageOptions{ParseMode: "MarkdownV2"}
 
+var regexReservedChars = regexp.MustCompile("([_\\*\\[\\]\\(\\)~`>#\\+-=\\|{}\\.!])")
+
 func (b *bot) trySendMsg(s string, opts *echotron.MessageOptions) {
-	// TODO: cleanup message by escaping reserved characters
 	var o echotron.MessageOptions
 	if opts == nil {
 		o = defaultMsgOptions
@@ -134,7 +136,8 @@ func (b *bot) trySendMsg(s string, opts *echotron.MessageOptions) {
 	}
 	_, err := b.SendMessage(s, b.chatID, &o)
 	if err != nil {
-		log.Printf("ERROR trying to send message to chatId %d:\nMessage:\n%s\n%s", b.chatID, s, err)
+		errMsg := regexReservedChars.ReplaceAllString(err.Error(), `\$1`)
+		log.Printf("ERROR trying to send message to chatId %d:\nMessage:\n%s\n%s", b.chatID, s, errMsg)
 	}
 }
 
