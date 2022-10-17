@@ -29,6 +29,7 @@ changelog:
       - "^build"
       - "^ci"
       - "^bump"
+      - "^Merge pull request"
 
   groups:
     - title: Features
