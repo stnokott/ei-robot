@@ -27,7 +27,7 @@ jobs:
       # More assembly might be required: Docker logins, GPG, etc. It all depends
       # on your needs.
       - name: Log in to the Container registry
-        uses: docker/login-action@v2.0.0
+        uses: docker/login-action@v2.1.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
