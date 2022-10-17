@@ -73,9 +73,22 @@ func (s *Store) Delete(k int64) (err error) {
 	return
 }
 
-func (s *Store) GetExpiredChats() ([]int64, []time.Time, error) {
-	var chatIDs []int64
-	var times []time.Time
+type Entry struct {
+	ChatID int64
+	T      time.Time
+}
+
+type ExpiryDates struct {
+	Past     []*Entry
+	Today    []*Entry
+	Tomorrow []*Entry
+}
+
+func (s *Store) GetEggExpiries() (*ExpiryDates, error) {
+	var past []*Entry
+	var today []*Entry
+	var tomorrow []*Entry
+	now := time.Now().Truncate(24 * time.Hour)
 	err := s.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchSize = 10
@@ -88,8 +101,14 @@ func (s *Store) GetExpiredChats() ([]int64, []time.Time, error) {
 				if t, err := decodeValue(v); err != nil {
 					return err
 				} else if time.Now().After(t) {
-					chatIDs = append(chatIDs, k)
-					times = append(times, t)
+					// past
+					past = append(past, &Entry{k, t})
+				} else if now.Equal(t.Truncate(24 * time.Hour)) {
+					// today
+					today = append(today, &Entry{k, t})
+				} else if now.Add(24 * time.Hour).Equal(t.Truncate(24 * time.Hour)) {
+					// tomorrow
+					tomorrow = append(tomorrow, &Entry{k, t})
 				}
 				return nil
 			})
@@ -100,9 +119,9 @@ func (s *Store) GetExpiredChats() ([]int64, []time.Time, error) {
 		return nil
 	})
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	} else {
-		return chatIDs, times, nil
+		return &ExpiryDates{past, today, tomorrow}, nil
 	}
 }
 
