@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"time"
 
@@ -48,6 +49,7 @@ func newBot(chatID int64, s *store.Store, api echotron.API) echotron.Bot {
 		OnUnknownCmd:          b.sendUnknownCommandMsg,
 		OnStartCmd:            b.sendHelpMsg,
 		OnNewEggCmd:           b.sendNewEggInitMsg,
+		OnEggsExist:           b.sendEggsAlreadyExistMsg,
 		OnInvalidDate:         b.sendInvalidDateMsg,
 		OnGetEggInfo:          b.sendEggInfo,
 		OnDelEggRequest:       b.sendDelEggRequestInfo,
@@ -73,12 +75,12 @@ func botSetup(api *echotron.API) {
 	}
 
 	// Chat menu commands
-	// TODO: all via constants (currently duplicated text)
 	cmds := []echotron.BotCommand{
-		{Command: constants.CMD_START, Description: "Hilfetext anzeigen"},
-		{Command: constants.CMD_NEWEGG, Description: "Neues Ei registrieren"},
-		{Command: constants.CMD_GETEGG, Description: "Ablaufdatum erfahren"},
-		{Command: constants.CMD_DELETEEGG, Description: "Registrierte Eier löschen"},
+		{Command: constants.CMD_START, Description: constants.DESC_CMD_START},
+		{Command: constants.CMD_NEWEGG, Description: constants.DESC_CMD_NEWEGG},
+		{Command: constants.CMD_GETEGG, Description: constants.DESC_CMD_GETEGG},
+		{Command: constants.CMD_DELETEEGG, Description: constants.DESC_CMD_DELETEEGG},
+		{Command: constants.CMD_CANCEL, Description: constants.DESC_CMD_CANCEL},
 	}
 
 	if _, err := api.SetMyCommands(nil, cmds...); err != nil {
@@ -93,11 +95,18 @@ func (b *bot) Update(update *echotron.Update) {
 	if strings.HasPrefix(msg, constants.CMD_START) {
 		event = logic.TRANS_START
 	} else if strings.HasPrefix(msg, constants.CMD_NEWEGG) {
-		event = logic.TRANS_NEW_EGG
+		event = b.handleNewEggRequest()
 	} else if strings.HasPrefix(msg, constants.CMD_GETEGG) {
 		event = logic.TRANS_GET_EGG_INFO
 	} else if strings.HasPrefix(msg, constants.CMD_DELETEEGG) {
 		event = b.handleDelEggRequest()
+	} else if strings.HasPrefix(msg, constants.CMD_CANCEL) {
+		event = logic.TRANS_CANCEL
+		if b.fsm.Current() == logic.STATE_IDLE {
+			b.sendNothingCancelled()
+		} else {
+			b.sendCancelled()
+		}
 	} else if b.fsm.Current() == logic.STATE_WAIT_DATE {
 		if t, err := tryParseDateStr(msg); err != nil {
 			event = logic.TRANS_SET_DAY_INVALID
@@ -117,14 +126,22 @@ func (b *bot) Update(update *echotron.Update) {
 		event = logic.TRANS_UNKNOWN
 	}
 	if err := b.fsm.Event(event); err != nil {
-		log.Panicf("Error triggering FSM event %s at state %s: %s", event, b.fsm.Current(), err)
+		log.Printf("Error triggering FSM event %s at state %s: %s", event, b.fsm.Current(), err)
+		b.trySendMsg("Das hätte nicht passieren dürfen, bitte folgenden Fehler an den Entwickler schicken:", nil)
+		b.trySendMsg("```"+strings.ReplaceAll(err.Error(), "`", "\\`")+"```", nil)
+		_ = b.fsm.Event(logic.TRANS_CANCEL)
 	}
 }
 
 var defaultMsgOptions = echotron.MessageOptions{ParseMode: "MarkdownV2"}
 
+var regexReservedChars = regexp.MustCompile("([_\\*\\[\\]\\(\\)~`>#\\+-=\\|{}\\.!])")
+
+func escapeReservedChars(s string) string {
+	return regexReservedChars.ReplaceAllString(s, `\$1`)
+}
+
 func (b *bot) trySendMsg(s string, opts *echotron.MessageOptions) {
-	// TODO: cleanup message by escaping reserved characters
 	var o echotron.MessageOptions
 	if opts == nil {
 		o = defaultMsgOptions
@@ -134,7 +151,7 @@ func (b *bot) trySendMsg(s string, opts *echotron.MessageOptions) {
 	}
 	_, err := b.SendMessage(s, b.chatID, &o)
 	if err != nil {
-		log.Printf("ERROR trying to send message to chatId %d:\nMessage:\n%s\n%s", b.chatID, s, err)
+		log.Printf("ERROR trying to send message to chatId %d:\nMessage:\n%s\n%s", b.chatID, s, escapeReservedChars(err.Error()))
 	}
 }
 
@@ -146,9 +163,32 @@ func (b *bot) sendUnknownCommandMsg() {
 	b.trySendMsg(constants.MSG_UNKNOWN_COMMAND, nil)
 }
 
+func (b *bot) handleNewEggRequest() (event string) {
+	_, err := b.store.Get(b.chatID)
+	if err != nil {
+		if errors.Is(err, store.ErrKeyNotFound) {
+			event = logic.TRANS_NEW_EGG
+		} else {
+			b.trySendMsg(fmt.Sprintf("Fehler beim Abruf aus der Datenbank: %s", err), nil)
+			event = logic.TRANS_SILENT_CANCEL
+		}
+	} else {
+		event = logic.TRANS_EGGS_ALREADY_EXISTS
+	}
+	return
+}
+
 func (b *bot) sendNewEggInitMsg() {
-	// TODO: check no existing eggs
 	b.trySendMsg(fmt.Sprintf(constants.MSG_NEWEGG_INIT, time.Now().Add(14*24*time.Hour).Format("02.01.2006")), nil)
+}
+
+func (b *bot) sendEggsAlreadyExistMsg() {
+	t, err := b.store.Get(b.chatID)
+	if err != nil {
+		b.trySendMsg(fmt.Sprintf("Fehler beim Abruf aus der Datenbank: %s", err), nil)
+	} else {
+		b.trySendMsg(fmt.Sprintf(constants.MSG_EGGS_EXIST, constants.FormatDate(t)), nil)
+	}
 }
 
 func (b *bot) sendConfirmDateMsg(t time.Time) {
@@ -231,4 +271,8 @@ func (b *bot) sendNoEggsInfo() {
 
 func (b *bot) sendCancelled() {
 	b.trySendMsg(constants.MSG_CANCELLED, nil)
+}
+
+func (b *bot) sendNothingCancelled() {
+	b.trySendMsg(constants.MSG_NOTHING_TO_CANCEL, nil)
 }
