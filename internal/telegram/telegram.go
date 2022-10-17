@@ -13,12 +13,22 @@ import (
 	"stnokott/eirobot/internal/store"
 
 	"github.com/NicoNex/echotron/v3"
+	"github.com/go-co-op/gocron"
 )
 
 func NewDispatcher(token string, s *store.Store) *echotron.Dispatcher {
 	api := echotron.NewAPI(token)
 	botSetup(&api)
-	checkExpired(&api, s)
+	checkMissedExpiry(&api, s)
+
+	sched := gocron.NewScheduler(time.Local)
+	_, err := sched.Every(1).Day().At("00:01").Do(func() {
+		notify(&api, s)
+	})
+	if err != nil {
+		log.Panicf("could not schedule notification check: %s", err)
+	}
+	sched.StartAsync()
 
 	dsp := echotron.NewDispatcher(token, func(chatId int64) echotron.Bot { return newBot(chatId, s, api) })
 	log.Printf("Telegram token = %sXXXXXX:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX%s", token[:4], token[len(token)-4:])
@@ -90,20 +100,48 @@ func botSetup(api *echotron.API) {
 	}
 }
 
-func checkExpired(api *echotron.API, store *store.Store) {
+func checkMissedExpiry(api *echotron.API, store *store.Store) {
 	log.Println("Checking for missed expiration notifications")
-	chatIDs, times, err := store.GetExpiredChats()
+	expiries, err := store.GetEggExpiries()
 	if err != nil {
 		log.Panicf("could not get expired chats: %s", err)
 	}
-	log.Printf(">> %d missed notifications", len(chatIDs))
-	for i, chatID := range chatIDs {
-		_, err = api.SendMessage(fmt.Sprintf(constants.MSG_MISSED_EXPIRY, constants.FormatDate(times[i])), chatID, &defaultMsgOptions)
+	log.Printf(">> %d missed notifications", len(expiries.Past))
+	for _, entry := range expiries.Past {
+		_, err = api.SendMessage(fmt.Sprintf(constants.MSG_MISSED_EXPIRY, constants.FormatDate(entry.T)), entry.ChatID, &defaultMsgOptions)
 		if err != nil {
-			log.Printf("could not send missed expiry notification to %d", chatID)
+			log.Printf("could not send missed expiry notification to %d", entry.ChatID)
 		}
-		if err = store.Delete(chatID); err != nil {
-			log.Printf("could not delete missed expiry value for %d: %s", chatID, err)
+		if err = store.Delete(entry.ChatID); err != nil {
+			log.Printf("could not delete missed expiry value for %d: %s", entry.ChatID, err)
+		}
+	}
+}
+
+func notify(api *echotron.API, store *store.Store) {
+	log.Println("running scheduled notification check")
+	expiries, err := store.GetEggExpiries()
+	if err != nil {
+		log.Printf("ERROR: could not get expired chats: %s", err)
+	}
+
+	log.Println(">> checking expiries for tomorrow")
+	for _, entry := range expiries.Tomorrow {
+		log.Printf(">>>> sending notification to %d", entry.ChatID)
+		_, err = api.SendMessage(fmt.Sprintf(constants.MSG_EXPIRES_TOMORROW, constants.FormatDate(entry.T)), entry.ChatID, &defaultMsgOptions)
+		if err != nil {
+			log.Printf("could not send expiry message to %d: %s", entry.ChatID, err)
+		}
+	}
+	log.Println(">> checking expiries for today")
+	for _, entry := range expiries.Today {
+		log.Printf(">>>> sending notification to %d", entry.ChatID)
+		_, err = api.SendMessage(fmt.Sprintf(constants.MSG_EXPIRES_TODAY, constants.FormatDate(entry.T)), entry.ChatID, &defaultMsgOptions)
+		if err != nil {
+			log.Printf("could not send expiry message to %d: %s", entry.ChatID, err)
+		}
+		if err = store.Delete(entry.ChatID); err != nil {
+			log.Printf("could not delete entry for %d: %s", entry.ChatID, err)
 		}
 	}
 }

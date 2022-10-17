@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"os"
-	"path"
 )
 
 const (
@@ -15,20 +14,20 @@ type Config struct {
 	DbDir         string
 }
 
+const dataDir = "/data"
+
 func New() (*Config, error) {
 	telegramToken := os.Getenv(envTelegramToken)
 	if telegramToken == "" {
 		return nil, fmt.Errorf("required environment variable %s not present", envTelegramToken)
 	}
 
-	dbDir, err := os.UserCacheDir()
-	if err != nil {
-		return nil, err
+	if err := os.Mkdir(dataDir, 0666); err != nil {
+		return nil, fmt.Errorf("could not create data dir: %w", err)
 	}
-	dbDir = path.Join(dbDir, "eirobot-data")
 
 	return &Config{
 		TelegramToken: telegramToken,
-		DbDir:         dbDir,
+		DbDir:         dataDir,
 	}, nil
 }
