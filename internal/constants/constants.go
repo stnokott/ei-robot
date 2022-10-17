@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-const VERSION = "v1.0.1"
+const VERSION = "v1.0.2"
 
 const (
 	CMD_START          string = "/start"
