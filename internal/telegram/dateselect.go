@@ -15,7 +15,7 @@ const (
 	uYear  string = "Jahr"
 )
 
-var regexDateRel = regexp.MustCompile(fmt.Sprintf(`(?:(?:in)|(?:nach)) (\d+) ((?:(?:%s)|(?:%s)|(?:%s)))e?n?`, uDay, uMonth, uYear))
+var regexDateRel = regexp.MustCompile(fmt.Sprintf(`(?i)(?:(?:in)|(?:nach)) (\d+) ((?:(?:%s)|(?:%s)|(?:%s)))e?n?`, uDay, uMonth, uYear))
 
 // Tries to understand inputs as defined in constants.MSG_NEWEGG_INIT
 func tryParseDateStr(s string) (time.Time, error) {
