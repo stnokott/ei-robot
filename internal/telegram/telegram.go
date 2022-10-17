@@ -117,13 +117,20 @@ func (b *bot) Update(update *echotron.Update) {
 		event = logic.TRANS_UNKNOWN
 	}
 	if err := b.fsm.Event(event); err != nil {
-		log.Panicf("Error triggering FSM event %s at state %s: %s", event, b.fsm.Current(), err)
+		log.Printf("Error triggering FSM event %s at state %s: %s", event, b.fsm.Current(), err)
+		b.trySendMsg("Das hätte nicht passieren dürfen, bitte folgenden Fehler an den Entwickler schicken:", nil)
+		b.trySendMsg("```"+strings.ReplaceAll(err.Error(), "`", "\\`")+"```", nil)
+		// TODO: cancel afterwards
 	}
 }
 
 var defaultMsgOptions = echotron.MessageOptions{ParseMode: "MarkdownV2"}
 
 var regexReservedChars = regexp.MustCompile("([_\\*\\[\\]\\(\\)~`>#\\+-=\\|{}\\.!])")
+
+func escapeReservedChars(s string) string {
+	return regexReservedChars.ReplaceAllString(s, `\$1`)
+}
 
 func (b *bot) trySendMsg(s string, opts *echotron.MessageOptions) {
 	var o echotron.MessageOptions
@@ -135,8 +142,7 @@ func (b *bot) trySendMsg(s string, opts *echotron.MessageOptions) {
 	}
 	_, err := b.SendMessage(s, b.chatID, &o)
 	if err != nil {
-		errMsg := regexReservedChars.ReplaceAllString(err.Error(), `\$1`)
-		log.Printf("ERROR trying to send message to chatId %d:\nMessage:\n%s\n%s", b.chatID, s, errMsg)
+		log.Printf("ERROR trying to send message to chatId %d:\nMessage:\n%s\n%s", b.chatID, s, escapeReservedChars(err.Error()))
 	}
 }
 

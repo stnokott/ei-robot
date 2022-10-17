@@ -53,7 +53,6 @@ func (f *FSM) Event(e string) error {
 		log.Printf(">> new state: %s", f.fsm.Current())
 		return nil
 	}
-	// TODO: catch invalid transition
 	return err
 }
 
