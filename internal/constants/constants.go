@@ -38,13 +38,13 @@ Valide Eingaben sind z\.B\.:` + "\n\\- `in 14 Tagen`\n\\- `%s`"
 
 const MSG_INVALID_DATE = `Das ist keine gültige Datumsangabe\. Bitte versuche es noch einmal\.`
 
-const MSG_DATE_SAVED = `*%s* erfolgreich gespeichert\.`
+const MSG_DATE_SAVED = `Auslaufdatum *%s* erfolgreich gespeichert\.`
 
 const MSG_NO_EGG = "Du hast noch keine Eier registriert\\. Verwende dafür " + CMD_NEWEGG + "\\."
 
 const MSG_EGG_INFO = `Deine Eier laufen am *%s* ab\.`
 
-const MSG_REQUEST_DEL_CONFIRM = `Deine Eier laufen am *%s* ab\. Bist du sicher, dass du das löschen möchtest?`
+const MSG_REQUEST_DEL_CONFIRM = `Deine Eier laufen am *%s* ab\. Bist du sicher, dass du sie löschen möchtest?`
 
 const MSG_INVALID_CONFIRMATION = `Ungültige Eingabe, bitte benutze die vorgegebenen Buttons\.`
 
