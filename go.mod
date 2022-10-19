@@ -9,7 +9,7 @@ require (
 
 require (
 	github.com/dgraph-io/badger/v3 v3.2103.3
-	github.com/go-co-op/gocron v1.17.0
+	github.com/go-co-op/gocron v1.17.1
 	github.com/goodsign/monday v1.0.0
 )
 
