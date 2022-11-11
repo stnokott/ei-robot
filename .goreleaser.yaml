@@ -95,10 +95,10 @@ announce:
     enabled: true
     chat_id: 725149271
     message_template: |
-      Neue Version *{{ .Version }}* für *{{ .ProjectName }}* veröffentlicht!
+      Neue Version *{{ replace .Version "." "\." }}* für *{{ .ProjectName }}* veröffentlicht!
       Release Notes:
-      {{ .ReleaseNotes }}
+      {{ replace replace .ReleaseNotes "." "\." "-" "\-" }}
 
-      `docker pull ghcr.io/stnokott/{{ .ProjectName }}:{{ .Version }}`
+      `docker pull ghcr.io/stnokott/{{ .ProjectName }}:{{ replace .Version "." "\." }}`
 
       {{ .GitURL }}
