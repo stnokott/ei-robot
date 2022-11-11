@@ -3,13 +3,13 @@ module stnokott/eirobot
 go 1.19
 
 require (
-	github.com/NicoNex/echotron/v3 v3.20.0
+	github.com/NicoNex/echotron/v3 v3.21.0
 	github.com/looplab/fsm v0.3.0
 )
 
 require (
 	github.com/dgraph-io/badger/v3 v3.2103.4
-	github.com/go-co-op/gocron v1.17.1
+	github.com/go-co-op/gocron v1.18.0
 	github.com/goodsign/monday v1.0.0
 )
 
