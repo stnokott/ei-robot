@@ -97,7 +97,7 @@ announce:
     message_template: |
       Neue Version *{{ replace .Version "." "\." }}* für *{{ .ProjectName }}* veröffentlicht!
       Release Notes:
-      {{ replace replace .ReleaseNotes "." "\." "-" "\-" }}
+      {{ replace .ReleaseNotes "." "\." }}
 
       `docker pull ghcr.io/stnokott/{{ .ProjectName }}:{{ replace .Version "." "\." }}`
 
