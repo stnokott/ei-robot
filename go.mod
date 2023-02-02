@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/NicoNex/echotron/v3 v3.22.0
-	github.com/looplab/fsm v0.3.0
+	github.com/looplab/fsm v1.0.1
 )
 
 require (
