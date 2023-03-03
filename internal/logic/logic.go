@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"context"
 	"log"
 
 	"github.com/looplab/fsm"
@@ -50,7 +51,7 @@ type FSM struct {
 
 func (f *FSM) Event(e string) error {
 	log.Printf("attempting FSM transition %s", e)
-	err := f.fsm.Event(e)
+	err := f.fsm.Event(context.Background(), e)
 	if _, ok := err.(fsm.NoTransitionError); ok || err == nil {
 		log.Printf(">> new state: %s", f.fsm.Current())
 		return nil
@@ -84,30 +85,30 @@ func NewFSM(cbs *TelegramCbs) *FSM {
 			STATE_IDLE,
 			events,
 			fsm.Callbacks{
-				TRANS_UNKNOWN:             func(_ *fsm.Event) { cbs.OnUnknownCmd() },
-				TRANS_START:               func(_ *fsm.Event) { cbs.OnStartCmd() },
-				TRANS_EGGS_ALREADY_EXISTS: func(_ *fsm.Event) { cbs.OnEggsExist() },
-				TRANS_NEW_EGG:             func(_ *fsm.Event) { cbs.OnNewEggCmd() },
-				TRANS_SET_DAY_INVALID:     func(_ *fsm.Event) { cbs.OnInvalidDate() },
-				TRANS_GET_EGG_INFO:        func(_ *fsm.Event) { cbs.OnGetEggInfo() },
-				TRANS_DEL_EGG:             func(_ *fsm.Event) { cbs.OnDelEggRequest() },
-				TRANS_YES: func(e *fsm.Event) {
+				TRANS_UNKNOWN:             func(_ context.Context, _ *fsm.Event) { cbs.OnUnknownCmd() },
+				TRANS_START:               func(_ context.Context, _ *fsm.Event) { cbs.OnStartCmd() },
+				TRANS_EGGS_ALREADY_EXISTS: func(_ context.Context, _ *fsm.Event) { cbs.OnEggsExist() },
+				TRANS_NEW_EGG:             func(_ context.Context, _ *fsm.Event) { cbs.OnNewEggCmd() },
+				TRANS_SET_DAY_INVALID:     func(_ context.Context, _ *fsm.Event) { cbs.OnInvalidDate() },
+				TRANS_GET_EGG_INFO:        func(_ context.Context, _ *fsm.Event) { cbs.OnGetEggInfo() },
+				TRANS_DEL_EGG:             func(_ context.Context, _ *fsm.Event) { cbs.OnDelEggRequest() },
+				TRANS_YES: func(_ context.Context, e *fsm.Event) {
 					if e.Src == STATE_WAIT_DEL_CONFIRM {
 						cbs.OnDelEggConfirm()
 					} else {
 						cbs.OnUnknownCmd()
 					}
 				},
-				TRANS_NO: func(e *fsm.Event) {
+				TRANS_NO: func(_ context.Context, e *fsm.Event) {
 					if e.Src == STATE_WAIT_DEL_CONFIRM {
 						cbs.OnDelEggCancel()
 					} else {
 						cbs.OnUnknownCmd()
 					}
 				},
-				TRANS_DEL_EGG_NO_EGG:       func(_ *fsm.Event) { cbs.OnDelEggNoEgg() },
-				TRANS_DEL_EGG_CANCEL:       func(_ *fsm.Event) { cbs.OnDelEggCancel() },
-				TRANS_INVALID_CONFIRMATION: func(_ *fsm.Event) { cbs.OnInvalidConfirmation() },
+				TRANS_DEL_EGG_NO_EGG:       func(_ context.Context, _ *fsm.Event) { cbs.OnDelEggNoEgg() },
+				TRANS_DEL_EGG_CANCEL:       func(_ context.Context, _ *fsm.Event) { cbs.OnDelEggCancel() },
+				TRANS_INVALID_CONFIRMATION: func(_ context.Context, _ *fsm.Event) { cbs.OnInvalidConfirmation() },
 			},
 		),
 	}
