@@ -9,7 +9,7 @@ require (
 
 require (
 	github.com/dgraph-io/badger/v3 v3.2103.5
-	github.com/go-co-op/gocron v1.18.1
+	github.com/go-co-op/gocron v1.23.0
 	github.com/goodsign/monday v1.0.0
 )
 
@@ -29,6 +29,5 @@ require (
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	go.opencensus.io v0.22.5 // indirect
 	golang.org/x/net v0.7.0 // indirect
-	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 )
