@@ -3,7 +3,7 @@ module stnokott/eirobot
 go 1.19
 
 require (
-	github.com/NicoNex/echotron/v3 v3.23.3
+	github.com/NicoNex/echotron/v3 v3.25.0
 	github.com/looplab/fsm v1.0.1
 )
 
